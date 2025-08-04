@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Cart</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+</head>
+<body>
+
+<div class="container mt-5">
+    <h1>Your Shopping Cart</h1>
+    <ul id="cart-list" class="list-group">
+        </ul>
+    <h3 class="mt-4">Total: $<span id="cart-total">0.00</span></h3>
+</div>
+
+<script>
+    const cartList = document.getElementById('cart-list');
+    const cartTotalElement = document.getElementById('cart-total');
+
+    async function fetchCart() {
+        try {
+            const response = await fetch('/cart');
+            const cartItems = await response.json();
+            
+            cartList.innerHTML = ''; // Clear previous items
+            let total = 0;
+
+            if (cartItems.length === 0) {
+                cartList.innerHTML = '<li class="list-group-item">Your cart is empty.</li>';
+            } else {
+                cartItems.forEach(item => {
+                    const listItem = document.createElement('li');
+                    listItem.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
+                    listItem.innerHTML = `
+                        ${item.name} (${item.quantity} x $${item.price.toFixed(2)})
+                        <span class="badge bg-primary rounded-pill">$${(item.price * item.quantity).toFixed(2)}</span>
+                    `;
+                    cartList.appendChild(listItem);
+                    total += item.price * item.quantity;
+                });
+            }
+            cartTotalElement.textContent = total.toFixed(2);
+
+        } catch (error) {
+            console.error('Error fetching cart:', error);
+            cartList.innerHTML = '<li class="list-group-item text-danger">Failed to load cart.</li>';
+        }
+    }
+
+    fetchCart();
+</script>
+
+</body>
+</html>
